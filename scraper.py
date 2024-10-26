@@ -4,16 +4,17 @@ from selenium.webdriver.common.by import By
 import time
 import math
 
-
-driver_path = "/home/saatvik/MetaMetaCritic/gecko_driver/geckodriver"
+driver_path = "gecko_driver/geckodriver"
 
 firefox_options = webdriver.FirefoxOptions()
 firefox_options.add_argument('--headless')
 
 service = Service(driver_path)
 driver = webdriver.Firefox(service=service, options=firefox_options)
+game_name = input("Please enter the name of a game: ")
+game_name = '-'.join(game_name.split())
 
-url = 'https://www.metacritic.com/game/risk-of-rain-2/user-reviews/'
+url = 'https://www.metacritic.com/game/'+ game_name + '/user-reviews/'
 driver.get(url)
 
 time.sleep(3)
@@ -39,6 +40,18 @@ for stats in frac_stats:
 print(frac_stats_dict)
 
 
+# Use LLM to also see if the reviews blame the company or not
+# Also scrape metacritic to get dev and publisher name
+# Can also scrape wikipedia for data on pending lawsuits
 
+main_page= 'https://www.metacritic.com/game/'+ game_name
+driver.get(main_page)
+time.sleep(3)
 
+names = {"Devs":"","Pubs":""}
+devs = driver.find_element(By.CLASS_NAME,'c-gameDetails_Developer')
+pubs = driver.find_element(By.CLASS_NAME,'c-gameDetails_Distributor')
+names["Devs"] = devs.text[devs.text.index("\n")+1::]
+names["Pubs"] = pubs.text[pubs.text.index("\n")+1::]
+print(names)
 driver.quit()
