@@ -15,6 +15,7 @@ game_name = input("Please enter the name of a game: ")
 game_name = '-'.join(game_name.split())
 
 url = 'https://www.metacritic.com/game/'+ game_name + '/user-reviews/'
+print(url)
 driver.get(url)
 
 time.sleep(3)
@@ -41,17 +42,30 @@ print(frac_stats_dict)
 
 
 # Use LLM to also see if the reviews blame the company or not
-# Also scrape metacritic to get dev and publisher name
-# Can also scrape wikipedia for data on pending lawsuits
+# First gather aspects using keyword extraction, then use ABSA on the aspects to get scores, anything with a positive score above a certain value is a pro
 
-main_page= 'https://www.metacritic.com/game/'+ game_name
-driver.get(main_page)
-time.sleep(3)
+# main_page= 'https://www.metacritic.com/game/'+ game_name
+# driver.get(main_page)
+# time.sleep(3)
 
-names = {"Devs":"","Pubs":""}
-devs = driver.find_element(By.CLASS_NAME,'c-gameDetails_Developer')
-pubs = driver.find_element(By.CLASS_NAME,'c-gameDetails_Distributor')
-names["Devs"] = devs.text[devs.text.index("\n")+1::]
-names["Pubs"] = pubs.text[pubs.text.index("\n")+1::]
-print(names)
+# names = {"Devs":"","Pubs":""}
+# devs = driver.find_element(By.CLASS_NAME,'c-gameDetails_Developer')
+# pubs = driver.find_element(By.CLASS_NAME,'c-gameDetails_Distributor')
+# date = driver.find_element(By.CLASS_NAME,'c-gameDetails_ReleaseDate')
+
+# names["Devs"] = devs.text[devs.text.index("\n")+1::]
+# names["Pubs"] = pubs.text[pubs.text.index("\n")+1::]
+# date = date.text()
+# print(date) # Add more logic here to check if the game is x+ years old
+
+# reddit_url = "https://www.reddit.com/search/?q=" + '+'.join(names["Devs"].split())
+# driver.get(reddit_url)
+# titles = driver.find_elements(By.TAG_NAME,'a')
+
+# title_list = []
+
+# for title in titles:
+#     title_list.append(title.text)
+# print(title_list)
+
 driver.quit()
