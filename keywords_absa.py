@@ -1,22 +1,32 @@
 from scraper import review_text_list
-from transformers import AutoTokenizer, AutoModelForSequenceClassification,pipeline
-from sklearn.feature_extraction.text import TfidfVectorizer
+from huggingface_hub import InferenceClient
+import random
 
-documents = review_text_list
-tfidf = TfidfVectorizer(max_df=0.85, stop_words='english')
-tfidf_matrix = tfidf.fit_transform(documents)
-keywords = tfidf.get_feature_names_out()
-print(keywords) # This is getting dogshit results
+client = InferenceClient(api_key="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")
+	
+def construct_prompt(review_text):
+    review = ""
+    for r in review_text:
+        review += str(review_text.index(r) + 1) + ") " + r + ". "
+    prompt = f"""
+    From the reviews below, summarize the Pros and Cons (in english) of the video game:
+    Reviews: "{review}".
+    """
+    return prompt
 
-model_name = "yangheng/deberta-v3-base-absa-v1.1"
-tokenizer = AutoTokenizer.from_pretrained(model_name,use_fast=False)
-model = AutoModelForSequenceClassification.from_pretrained(model_name)
+prompt = construct_prompt(random.choices(review_text_list,k=15))
+messages = [
+	{ "role": "user", "content": f"{prompt}" }
+]
 
-classifier = pipeline("text-classification", model=model,tokenizer=tokenizer)
 
-for review in review_text_list:
-    for keyword in keywords:
-        if keyword not in review:
-            continue
-        else:
-            print(keyword,classifier(review,text_pair=keyword))
+stream = client.chat.completions.create(
+    model="meta-llama/Llama-3.2-3B-Instruct", 
+	messages=messages, 
+	max_tokens=550,
+	stream=True
+)
+output = ""
+for chunk in stream:
+    output += chunk.choices[0].delta.content
+print(output)
